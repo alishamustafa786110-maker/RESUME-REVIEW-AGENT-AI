@@ -1,0 +1,12 @@
+# Never commit real secrets
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# OS junk
+.DS_Store
