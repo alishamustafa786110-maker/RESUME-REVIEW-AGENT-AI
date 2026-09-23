@@ -1,4 +1,3 @@
-```python
 """
 crew_agent.py
 --------------
