@@ -1,33 +1,15 @@
-"""
-crew_agent.py
---------------
-This file defines the "brain" of the app: a single CrewAI agent that compares
-a resume against a job description and writes a structured feedback report.
-
-Students: you don't need to touch this file to run the app. If you want to
-change how the agent thinks or what it outputs, edit the text inside
-`build_crew()` below.
-"""
-
+```python
 from crewai import Agent, Task, Crew, Process, LLM
 
 
 def build_crew(api_key: str, model_name: str) -> Crew:
-    """
-    Builds and returns a CrewAI Crew containing exactly one agent and one task.
 
-    api_key    -> your Groq API key (read from Streamlit secrets in app.py)
-    model_name -> the Groq model to use, e.g. "groq/openai/gpt-oss-120b"
-    """
-
-    # 1. Connect CrewAI to Groq's LLM.
     llm = LLM(
         model=model_name,
         api_key=api_key,
         temperature=0.3,
     )
 
-    # 2. Define the single agent that will do the review.
     resume_reviewer = Agent(
         role="Senior Technical Recruiter and Resume Coach",
         goal=(
@@ -51,7 +33,6 @@ def build_crew(api_key: str, model_name: str) -> Crew:
         cache=False,
     )
 
-    # 3. Define the one task this agent must complete.
     review_task = Task(
         description=(
             "You are given a CANDIDATE RESUME and a TARGET JOB DESCRIPTION below.\n\n"
@@ -69,22 +50,14 @@ def build_crew(api_key: str, model_name: str) -> Crew:
             "resume, even if it seems likely the candidate has it.\n\n"
             "1. Give an overall match score from 0-100 and briefly justify it "
             "in 1-2 sentences.\n"
-            "2. List the candidate's strongest matching qualifications (skills, "
-            "experience, achievements) that directly align with the job "
-            "description.\n"
-            "3. List important job requirements that are missing or only "
-            "weakly represented in the resume.\n"
+            "2. List the candidate's strongest matching qualifications.\n"
+            "3. List important job requirements that are missing or weakly "
+            "represented in the resume.\n"
             "4. Give 5-8 concrete, actionable recommendations to improve the "
-            "resume for this specific job. Each one should say what to change "
-            "and why. Never suggest adding anything that isn't true — only "
-            "suggest rewording, reordering, quantifying achievements, better "
-            "highlighting things that are already there, or honestly learning "
-            "a genuinely missing skill.\n"
+            "resume for this specific job.\n"
             "5. Suggest 8-12 keywords taken from the job description that the "
-            "candidate should naturally work into the resume (only where "
-            "truthful), to help pass Applicant Tracking Systems (ATS).\n\n"
-            "Format the entire answer in clean Markdown using exactly these "
-            "section headers, in this order:\n"
+            "candidate should naturally work into the resume when truthful.\n\n"
+            "Format the answer in clean Markdown using exactly these headers:\n"
             "## Match Score\n"
             "## Matching Strengths\n"
             "## Gaps & Missing Requirements\n"
@@ -93,13 +66,11 @@ def build_crew(api_key: str, model_name: str) -> Crew:
         ),
         expected_output=(
             "A well-formatted Markdown report with the five sections listed "
-            "above, grounded only in the actual resume text provided, with no "
-            "invented qualifications."
+            "above, grounded only in the actual resume text provided."
         ),
         agent=resume_reviewer,
     )
 
-    # 4. Wrap the agent + task into a Crew.
     crew = Crew(
         agents=[resume_reviewer],
         tasks=[review_task],
@@ -116,11 +87,6 @@ def run_resume_review(
     job_description: str,
     model_name: str,
 ) -> str:
-    """
-    Convenience function used by app.py.
-    Builds the crew, runs it with the given resume + job description,
-    and returns the final Markdown report as plain text.
-    """
 
     crew = build_crew(
         api_key=api_key,
@@ -134,6 +100,5 @@ def run_resume_review(
         }
     )
 
-    # CrewOutput objects convert nicely to a plain string.
     return str(result)
 ```
