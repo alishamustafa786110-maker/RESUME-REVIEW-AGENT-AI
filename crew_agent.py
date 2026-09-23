@@ -1,3 +1,4 @@
+```python
 """
 crew_agent.py
 --------------
@@ -21,11 +22,10 @@ def build_crew(api_key: str, model_name: str) -> Crew:
     """
 
     # 1. Connect CrewAI to Groq's LLM.
-    # CrewAI understands the "groq/<model-id>" format out of the box.
     llm = LLM(
         model=model_name,
         api_key=api_key,
-        temperature=0.3,   # low temperature = more focused, less "creative" output
+        temperature=0.3,
     )
 
     # 2. Define the single agent that will do the review.
@@ -46,7 +46,6 @@ def build_crew(api_key: str, model_name: str) -> Crew:
             "feedback is always specific enough that the candidate knows "
             "exactly what to change."
         ),
-              ),
         llm=llm,
         verbose=False,
         allow_delegation=False,
@@ -54,8 +53,6 @@ def build_crew(api_key: str, model_name: str) -> Crew:
     )
 
     # 3. Define the one task this agent must complete.
-    # {resume_text} and {job_description} are placeholders that CrewAI fills
-    # in automatically from the `inputs` dictionary passed to crew.kickoff().
     review_task = Task(
         description=(
             "You are given a CANDIDATE RESUME and a TARGET JOB DESCRIPTION below.\n\n"
@@ -103,29 +100,41 @@ def build_crew(api_key: str, model_name: str) -> Crew:
         agent=resume_reviewer,
     )
 
-    # 4. Wrap the agent + task into a Crew. Sequential process = just run the
-    # one task, in order (this is the simplest possible CrewAI setup).
+    # 4. Wrap the agent + task into a Crew.
     crew = Crew(
         agents=[resume_reviewer],
         tasks=[review_task],
         process=Process.sequential,
         verbose=False,
     )
+
     return crew
 
 
-def run_resume_review(api_key: str, resume_text: str, job_description: str, model_name: str) -> str:
+def run_resume_review(
+    api_key: str,
+    resume_text: str,
+    job_description: str,
+    model_name: str,
+) -> str:
     """
     Convenience function used by app.py.
-    Builds the crew, runs it with the given resume + job description, and
-    returns the final Markdown report as plain text.
+    Builds the crew, runs it with the given resume + job description,
+    and returns the final Markdown report as plain text.
     """
-    crew = build_crew(api_key=api_key, model_name=model_name)
+
+    crew = build_crew(
+        api_key=api_key,
+        model_name=model_name,
+    )
+
     result = crew.kickoff(
         inputs={
             "resume_text": resume_text,
             "job_description": job_description,
         }
     )
-    # CrewOutput objects convert nicely to a plain string with str()
+
+    # CrewOutput objects convert nicely to a plain string.
     return str(result)
+```
