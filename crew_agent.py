@@ -46,9 +46,11 @@ def build_crew(api_key: str, model_name: str) -> Crew:
             "feedback is always specific enough that the candidate knows "
             "exactly what to change."
         ),
+              ),
         llm=llm,
         verbose=False,
         allow_delegation=False,
+        cache=False,
     )
 
     # 3. Define the one task this agent must complete.
